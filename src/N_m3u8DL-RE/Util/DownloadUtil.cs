@@ -2,8 +2,6 @@
 using N_m3u8DL_RE.Common.Resource;
 using N_m3u8DL_RE.Common.Util;
 using N_m3u8DL_RE.Entity;
-using System.IO;
-using System.Net;
 using System.Net.Http.Headers;
 
 namespace N_m3u8DL_RE.Util

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mp4SubtitleParser
+﻿namespace Mp4SubtitleParser
 {
     //make BinaryReader in Big Endian
     class BinaryReader2 : BinaryReader

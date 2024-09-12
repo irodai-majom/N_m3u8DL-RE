@@ -6,15 +6,6 @@ using N_m3u8DL_RE.Crypto;
 using N_m3u8DL_RE.Entity;
 using N_m3u8DL_RE.Util;
 using Spectre.Console;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace N_m3u8DL_RE.Downloader
 {

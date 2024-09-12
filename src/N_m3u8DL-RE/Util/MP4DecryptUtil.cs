@@ -1,7 +1,6 @@
 ﻿using Mp4SubtitleParser;
 using N_m3u8DL_RE.Common.Log;
 using N_m3u8DL_RE.Common.Resource;
-using N_m3u8DL_RE.Config;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 

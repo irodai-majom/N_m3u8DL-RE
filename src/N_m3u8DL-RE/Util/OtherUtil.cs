@@ -1,9 +1,4 @@
-﻿using N_m3u8DL_RE.Common.Entity;
-using N_m3u8DL_RE.Common.Log;
-using N_m3u8DL_RE.Enum;
-using System.CommandLine;
-using System.IO.Compression;
-using System.Text;
+﻿using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 namespace N_m3u8DL_RE.Util

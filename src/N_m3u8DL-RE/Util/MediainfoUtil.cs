@@ -1,12 +1,6 @@
 ﻿using N_m3u8DL_RE.Entity;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace N_m3u8DL_RE.Util
 {

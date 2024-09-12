@@ -6,7 +6,6 @@ using N_m3u8DL_RE.Parser.Constants;
 using N_m3u8DL_RE.Parser.Extractor;
 using N_m3u8DL_RE.Common.Util;
 using N_m3u8DL_RE.Common.Enum;
-using Spectre.Console;
 
 namespace N_m3u8DL_RE.Parser
 {

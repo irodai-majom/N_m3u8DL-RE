@@ -1,16 +1,8 @@
 ﻿using N_m3u8DL_RE.Common.Log;
 using N_m3u8DL_RE.Entity;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.CommandLine;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 
 namespace N_m3u8DL_RE.Util
 {

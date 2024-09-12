@@ -5,12 +5,6 @@ using N_m3u8DL_RE.Common.Log;
 using N_m3u8DL_RE.Common.Resource;
 using N_m3u8DL_RE.Parser.Util;
 using N_m3u8DL_RE.Parser.Constants;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using N_m3u8DL_RE.Common.Util;
 
 namespace N_m3u8DL_RE.Parser.Extractor
