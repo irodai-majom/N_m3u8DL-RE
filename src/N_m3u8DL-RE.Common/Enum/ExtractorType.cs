@@ -1,10 +1,9 @@
-﻿namespace N_m3u8DL_RE.Common.Enum
+﻿namespace N_m3u8DL_RE.Common.Enum;
+
+public enum ExtractorType
 {
-    public enum ExtractorType
-    {
-        MPEG_DASH,
-        HLS,
-        HTTP_LIVE,
-        MSS
-    }
+    MPEG_DASH,
+    HLS,
+    HTTP_LIVE,
+    MSS
 }
