@@ -1,5 +1,4 @@
 ﻿using N_m3u8DL_RE.Common.Util;
-using System.Security.Cryptography;
 
 namespace Mp4SubtitleParser
 {

@@ -15,10 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-using System;
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices; // For MethodImplOptions.AggressiveInlining
 
 namespace CSChaCha20

@@ -12,16 +12,10 @@ using N_m3u8DL_RE.Parser;
 using N_m3u8DL_RE.Parser.Mp4;
 using N_m3u8DL_RE.Util;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.IO;
 using System.IO.Pipes;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using System.Xml.Linq;
 
 namespace N_m3u8DL_RE.DownloadManager
 {
