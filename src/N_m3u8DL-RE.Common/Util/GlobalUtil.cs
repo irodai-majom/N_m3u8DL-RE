@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace N_m3u8DL_RE.Common.Util;
 
-public class GlobalUtil
+public static class GlobalUtil
 {
     private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
     {

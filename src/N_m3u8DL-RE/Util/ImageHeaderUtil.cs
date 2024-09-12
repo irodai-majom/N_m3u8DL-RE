@@ -1,6 +1,6 @@
 ﻿namespace N_m3u8DL_RE.Util;
 
-internal class ImageHeaderUtil
+internal static class ImageHeaderUtil
 {
     public static bool IsImageHeader(byte[] bArr)
     {

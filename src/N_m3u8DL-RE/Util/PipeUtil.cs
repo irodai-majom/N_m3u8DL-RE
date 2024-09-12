@@ -6,7 +6,7 @@ using System.Text;
 
 namespace N_m3u8DL_RE.Util;
 
-internal class PipeUtil
+internal static class PipeUtil
 {
     public static Stream CreatePipe(string pipeName)
     {

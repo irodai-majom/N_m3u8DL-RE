@@ -18,9 +18,8 @@ class Language
     }
 }
 
-internal class LanguageCodeUtil
+internal static class LanguageCodeUtil
 {
-    private LanguageCodeUtil() { }
 
     private readonly static List<Language> ALL_LANGS = @"
 af;afr;Afrikaans;Afrikaans
