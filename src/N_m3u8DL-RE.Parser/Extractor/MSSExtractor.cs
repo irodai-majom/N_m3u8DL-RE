@@ -110,24 +110,26 @@ internal partial class MSSExtractor : IExtractor
                 playlist.IsLive = isLive;
                 playlist.MediaParts.Add(new MediaPart());
 
-                StreamSpec streamSpec = new();
-                streamSpec.PublishTime = DateTime.Now; //发布时间默认现在
-                streamSpec.Extension = "m4s";
-                streamSpec.OriginalUrl = ParserConfig.OriginalUrl;
-                streamSpec.PeriodId = qualityLevel.IndexStr;
-                streamSpec.Playlist = playlist;
-                streamSpec.GroupId = name ?? qualityLevel.IndexStr;
-                streamSpec.Bandwidth = qualityLevel.Bitrate;
-                streamSpec.Codecs = ParseCodecs(qualityLevel.FourCC, qualityLevel.CodecPrivateData);
-                streamSpec.Language = language;
-                streamSpec.Resolution = qualityLevel.Resolution;
-                streamSpec.Url = IsmUrl;
-                streamSpec.Channels = qualityLevel.Channels;
-                streamSpec.MediaType = type switch
+                StreamSpec streamSpec = new()
                 {
-                    "text" => MediaType.SUBTITLES,
-                    "audio" => MediaType.AUDIO,
-                    _ => null
+                    PublishTime = DateTime.Now, //发布时间默认现在
+                    Extension = "m4s",
+                    OriginalUrl = ParserConfig.OriginalUrl,
+                    PeriodId = qualityLevel.IndexStr,
+                    Playlist = playlist,
+                    GroupId = name ?? qualityLevel.IndexStr,
+                    Bandwidth = qualityLevel.Bitrate,
+                    Codecs = ParseCodecs(qualityLevel.FourCC, qualityLevel.CodecPrivateData),
+                    Language = language,
+                    Resolution = qualityLevel.Resolution,
+                    Url = IsmUrl,
+                    Channels = qualityLevel.Channels,
+                    MediaType = type switch
+                    {
+                        "text" => MediaType.SUBTITLES,
+                        "audio" => MediaType.AUDIO,
+                        _ => null
+                    }
                 };
 
                 streamSpec.Playlist.MediaInit = new MediaSegment();
