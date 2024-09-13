@@ -29,9 +29,11 @@ public class MSSExtractorTest
         streamSpec0.Codecs.Should().Be("avc1.64001F");
         streamSpec0.Resolution.Should().Be("1280x720");
         streamSpec0.Channels.Should().Be(null);
-        streamSpec0.MSSData.SamplingRate.Should().Be(48000);
+        streamSpec0.MSSData!.SamplingRate.Should().Be(48000);
         streamSpec0.MSSData.BitsPerSample.Should().Be(16);
         streamSpec0.MSSData.NalUnitLengthField.Should().Be(4);
+        streamSpec0.MSSData.Duration.Should().Be(1209510000L);
+        streamSpec0.MSSData.Timesacle.Should().Be(10000000);
 
         var streamSpec1 = streamSpecs[1];
         streamSpec1.PeriodId.Should().Be("1");
@@ -43,6 +45,8 @@ public class MSSExtractorTest
         streamSpec1.MSSData!.SamplingRate.Should().Be(48000);
         streamSpec1.MSSData.BitsPerSample.Should().Be(16);
         streamSpec1.MSSData.NalUnitLengthField.Should().Be(4);
+        streamSpec1.MSSData.Duration.Should().Be(1209510000L);
+        streamSpec1.MSSData.Timesacle.Should().Be(10000000);
 
         var streamSpec5 = streamSpecs[5];
         streamSpec5.PeriodId.Should().Be("5");
@@ -54,6 +58,8 @@ public class MSSExtractorTest
         streamSpec5.MSSData!.SamplingRate.Should().Be(48000);
         streamSpec5.MSSData.BitsPerSample.Should().Be(16);
         streamSpec5.MSSData.NalUnitLengthField.Should().Be(4);
+        streamSpec5.MSSData.Duration.Should().Be(1209510000L);
+        streamSpec5.MSSData.Timesacle.Should().Be(10000000);
         
         var streamSpec8 = streamSpecs[8];
         streamSpec8.PeriodId.Should().Be(null);
@@ -65,6 +71,8 @@ public class MSSExtractorTest
         streamSpec8.MSSData!.SamplingRate.Should().Be(44100);
         streamSpec8.MSSData.BitsPerSample.Should().Be(16);
         streamSpec8.MSSData.NalUnitLengthField.Should().Be(4);
+        streamSpec8.MSSData.Duration.Should().Be(1209510000L);
+        streamSpec8.MSSData.Timesacle.Should().Be(10000000);
     }
 
     private Uri getResourceUri(string resourceName)

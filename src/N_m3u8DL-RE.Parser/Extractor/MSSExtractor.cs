@@ -48,18 +48,14 @@ internal partial class MSSExtractor : IExtractor
     public async Task<List<StreamSpec>> ExtractStreamsAsync(string rawText)
     {
         var streamList = new List<StreamSpec>();
-        this.IsmContent = rawText;
-        this.PreProcessContent();
+        IsmContent = rawText;
+        PreProcessContent();
 
         var xmlDocument = XDocument.Parse(IsmContent);
 
         //选中第一个SmoothStreamingMedia节点
         var ssmElement = xmlDocument.Elements().First(e => e.Name.LocalName == "SmoothStreamingMedia");
-        var timeScaleStr = ssmElement.Attribute("TimeScale")?.Value ?? "10000000";
-        var durationStr = ssmElement.Attribute("Duration")?.Value;
-        var timescale = Convert.ToInt32(timeScaleStr);
-        var isLiveStr = ssmElement.Attribute("IsLive")?.Value;
-        bool isLive = Convert.ToBoolean(isLiveStr ?? "FALSE");
+        var ssm = ReadSmoothStreamingMedia(ssmElement);
 
         var isProtection = false;
         var protectionSystemId = "";
@@ -107,7 +103,7 @@ internal partial class MSSExtractor : IExtractor
 
                 var qualityLevel = ReadQualityLevel(qualityLevelElem);
                 var playlist = new Playlist();
-                playlist.IsLive = isLive;
+                playlist.IsLive = ssm.IsLive;
                 playlist.MediaParts.Add(new MediaPart());
 
                 StreamSpec streamSpec = new()
@@ -146,14 +142,10 @@ internal partial class MSSExtractor : IExtractor
 
                 foreach (var c in cElements)
                 {
-                    //每个C元素包含三个属性:@t(start time)\@r(repeat count)\@d(duration)
-                    var _startTimeStr = c.Attribute("t")?.Value;
-                    var _durationStr = c.Attribute("d")?.Value;
-                    var _repeatCountStr = c.Attribute("r")?.Value;
+                    var cElem = ReadCElement(c);
 
-                    if (_startTimeStr != null) currentTime = Convert.ToInt64(_startTimeStr);
-                    var _duration = Convert.ToInt64(_durationStr);
-                    var _repeatCount = Convert.ToInt64(_repeatCountStr);
+                    if (cElem.StartTime != null) currentTime = cElem.StartTime.Value;
+                    var _repeatCount = cElem.RepeatCount;
                     if (_repeatCount > 0)
                     {
                         // This value is one-based. (A value of 2 means two fragments in the contiguous series).
@@ -167,13 +159,13 @@ internal partial class MSSExtractor : IExtractor
                     mediaSegment.Url = mediaUrl;
                     if (oriUrl.Contains(MSSTags.StartTime))
                         mediaSegment.NameFromVar = currentTime.ToString();
-                    mediaSegment.Duration = _duration / (double)timescale;
+                    mediaSegment.Duration = cElem.Duration / (double)ssm.Timescale;
                     mediaSegment.Index = segIndex++;
                     streamSpec.Playlist.MediaParts[0].MediaSegments.Add(mediaSegment);
                     if (_repeatCount < 0)
                     {
                         //负数表示一直重复 直到period结束 注意减掉已经加入的1个片段
-                        _repeatCount = (long)Math.Ceiling(Convert.ToInt64(durationStr) / (double)_duration) - 1;
+                        _repeatCount = (long)Math.Ceiling(ssm.Duration / (double)cElem.Duration) - 1;
                     }
                     for (long i = 0; i < _repeatCount; i++)
                     {
@@ -184,7 +176,7 @@ internal partial class MSSExtractor : IExtractor
                         var _mediaUrl = ParserUtil.ReplaceVars(_oriUrl, varDic);
                         _mediaSegment.Url = _mediaUrl;
                         _mediaSegment.Index = segIndex++;
-                        _mediaSegment.Duration = _duration / (double)timescale;
+                        _mediaSegment.Duration = _duration / (double)ssm.Timescale;
                         if (_oriUrl.Contains(MSSTags.StartTime))
                             _mediaSegment.NameFromVar = currentTime.ToString();
                         streamSpec.Playlist.MediaParts[0].MediaSegments.Add(_mediaSegment);
@@ -200,8 +192,8 @@ internal partial class MSSExtractor : IExtractor
                         FourCC = qualityLevel.FourCC,
                         CodecPrivateData = qualityLevel.CodecPrivateData,
                         Type = type!,
-                        Timesacle = Convert.ToInt32(timeScaleStr),
-                        Duration = Convert.ToInt64(durationStr),
+                        Timesacle = ssm.Timescale,
+                        Duration = ssm.Duration,
                         SamplingRate = qualityLevel.SamplingRate ?? 48000,
                         Channels = Convert.ToInt32(qualityLevel.Channels ?? "2"),
                         BitsPerSample = Convert.ToInt32(qualityLevel.BitsPerSampleStr ?? "16"),
@@ -386,6 +378,19 @@ internal partial class MSSExtractor : IExtractor
         await ProcessUrlAsync(streamSpecs);
     }
 
+    private SmoothStreamingMedia ReadSmoothStreamingMedia(XElement ssmElement)
+    {
+        var timeScaleStr = ssmElement.Attribute("TimeScale")?.Value ?? "10000000";
+        var durationStr = ssmElement.Attribute("Duration")?.Value;
+        var isLiveStr = ssmElement.Attribute("IsLive")?.Value;
+
+        var duration = Convert.ToInt64(durationStr);
+        var timescale = Convert.ToInt32(timeScaleStr);
+        var isLive = Convert.ToBoolean(isLiveStr ?? "FALSE");
+        
+        return new SmoothStreamingMedia(duration, timescale, isLive);
+    }
+
     private QualityLevel ReadQualityLevel(XElement qualityLevelElem)
     {
         var fourCC = qualityLevelElem.Attribute("FourCC")!.Value.ToUpper();
@@ -414,7 +419,24 @@ internal partial class MSSExtractor : IExtractor
             channels);
     }
 
-    record QualityLevel(
+    private CElement ReadCElement(XElement c)
+    {
+        //每个C元素包含三个属性:@t(start time)\@r(repeat count)\@d(duration)
+        var startTimeStr = c.Attribute("t")?.Value;
+        var durationStr = c.Attribute("d")?.Value;
+        var repeatCountStr = c.Attribute("r")?.Value;
+        
+        long? startTime = startTimeStr == null ? null : Convert.ToInt64(startTimeStr);
+       
+        var duration = Convert.ToInt64(durationStr);
+        var repeatCount = Convert.ToInt64(repeatCountStr);
+        
+        return new CElement(startTime, duration, repeatCount);
+    }
+
+    private record SmoothStreamingMedia(long Duration, int Timescale, bool IsLive);
+
+    private record QualityLevel(
         string FourCC,
         string? SamplingRateStr,
         string? BitsPerSampleStr,
@@ -431,5 +453,8 @@ internal partial class MSSExtractor : IExtractor
         public string? Resolution => Width == 0 ? null : $"{Width}x{Height}";
 
         public int? SamplingRate => SamplingRateStr == null ? null : Convert.ToInt32(SamplingRateStr);
-    };
+    }
+
+    private record CElement(long? StartTime, long Duration, long RepeatCount);
+
 }
