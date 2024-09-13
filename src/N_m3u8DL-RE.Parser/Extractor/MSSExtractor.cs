@@ -100,37 +100,29 @@ internal partial class MSSExtractor : IExtractor
             //所有QualityLevel节点
             var qualityLevelElements = streamIndex.Elements().Where(e => e.Name.LocalName == "QualityLevel");
 
-            foreach (var qualityLevel in qualityLevelElements)
+            foreach (var qualityLevelElem in qualityLevelElements)
             {
-                urlPattern = (qualityLevel.Attribute("Url")?.Value ?? urlPattern)!
+                urlPattern = (qualityLevelElem.Attribute("Url")?.Value ?? urlPattern)!
                     .Replace(MSSTags.Bitrate_BK, MSSTags.Bitrate).Replace(MSSTags.StartTime_BK, MSSTags.StartTime);
-                var fourCC = qualityLevel.Attribute("FourCC")!.Value.ToUpper();
-                var samplingRateStr = qualityLevel.Attribute("SamplingRate")?.Value;
-                var bitsPerSampleStr = qualityLevel.Attribute("BitsPerSample")?.Value;
-                var nalUnitLengthFieldStr = qualityLevel.Attribute("NALUnitLengthField")?.Value;
-                var indexStr = qualityLevel.Attribute("Index")?.Value;
-                var codecPrivateData = qualityLevel.Attribute("CodecPrivateData")?.Value ?? "";
-                var audioTag = qualityLevel.Attribute("AudioTag")?.Value;
-                var bitrate = Convert.ToInt32(qualityLevel.Attribute("Bitrate")?.Value ?? "0");
-                var width = Convert.ToInt32(qualityLevel.Attribute("MaxWidth")?.Value ?? "0");
-                var height = Convert.ToInt32(qualityLevel.Attribute("MaxHeight")?.Value ?? "0");
-                var channels = qualityLevel.Attribute("Channels")?.Value;
+
+                var qualityLevel = ReadQualityLevel(qualityLevelElem);
+                var playlist = new Playlist();
+                playlist.IsLive = isLive;
+                playlist.MediaParts.Add(new MediaPart());
 
                 StreamSpec streamSpec = new();
                 streamSpec.PublishTime = DateTime.Now; //发布时间默认现在
                 streamSpec.Extension = "m4s";
                 streamSpec.OriginalUrl = ParserConfig.OriginalUrl;
-                streamSpec.PeriodId = indexStr;
-                streamSpec.Playlist = new Playlist();
-                streamSpec.Playlist.IsLive = isLive;
-                streamSpec.Playlist.MediaParts.Add(new MediaPart());
-                streamSpec.GroupId = name ?? indexStr;
-                streamSpec.Bandwidth = bitrate;
-                streamSpec.Codecs = ParseCodecs(fourCC, codecPrivateData);
+                streamSpec.PeriodId = qualityLevel.IndexStr;
+                streamSpec.Playlist = playlist;
+                streamSpec.GroupId = name ?? qualityLevel.IndexStr;
+                streamSpec.Bandwidth = qualityLevel.Bitrate;
+                streamSpec.Codecs = ParseCodecs(qualityLevel.FourCC, qualityLevel.CodecPrivateData);
                 streamSpec.Language = language;
-                streamSpec.Resolution = width == 0 ? null : $"{width}x{height}";
+                streamSpec.Resolution = qualityLevel.Resolution;
                 streamSpec.Url = IsmUrl;
-                streamSpec.Channels = channels;
+                streamSpec.Channels = qualityLevel.Channels;
                 streamSpec.MediaType = type switch
                 {
                     "text" => MediaType.SUBTITLES,
@@ -139,16 +131,16 @@ internal partial class MSSExtractor : IExtractor
                 };
 
                 streamSpec.Playlist.MediaInit = new MediaSegment();
-                if (!string.IsNullOrEmpty(codecPrivateData))
+                if (!string.IsNullOrEmpty(qualityLevel.CodecPrivateData))
                 {
                     streamSpec.Playlist.MediaInit.Index = -1; //便于排序
-                    streamSpec.Playlist.MediaInit.Url = $"hex://{codecPrivateData}";
+                    streamSpec.Playlist.MediaInit.Url = $"hex://{qualityLevel.CodecPrivateData}";
                 }
 
                 var currentTime = 0L;
                 var segIndex = 0;
                 var varDic = new Dictionary<string, object?>();
-                varDic[MSSTags.Bitrate] = bitrate;
+                varDic[MSSTags.Bitrate] = qualityLevel.Bitrate;
 
                 foreach (var c in cElements)
                 {
@@ -199,19 +191,19 @@ internal partial class MSSExtractor : IExtractor
                 }
 
                 //生成MOOV数据
-                if (MSSMoovProcessor.CanHandle(fourCC!))
+                if (MSSMoovProcessor.CanHandle(qualityLevel.FourCC))
                 {
                     streamSpec.MSSData = new MSSData()
                     {
-                        FourCC = fourCC!,
-                        CodecPrivateData = codecPrivateData,
+                        FourCC = qualityLevel.FourCC,
+                        CodecPrivateData = qualityLevel.CodecPrivateData,
                         Type = type!,
                         Timesacle = Convert.ToInt32(timeScaleStr),
                         Duration = Convert.ToInt64(durationStr),
-                        SamplingRate = Convert.ToInt32(samplingRateStr ?? "48000"),
-                        Channels = Convert.ToInt32(channels ?? "2"),
-                        BitsPerSample = Convert.ToInt32(bitsPerSampleStr ?? "16"),
-                        NalUnitLengthField = Convert.ToInt32(nalUnitLengthFieldStr ?? "4"),
+                        SamplingRate = qualityLevel.SamplingRate ?? 48000,
+                        Channels = Convert.ToInt32(qualityLevel.Channels ?? "2"),
+                        BitsPerSample = Convert.ToInt32(qualityLevel.BitsPerSampleStr ?? "16"),
+                        NalUnitLengthField = Convert.ToInt32(qualityLevel.NalUnitLengthFieldStr ?? "4"),
                         IsProtection = isProtection,
                         ProtectionData = protectionData,
                         ProtectionSystemID = protectionSystemId,
@@ -235,7 +227,7 @@ internal partial class MSSExtractor : IExtractor
                 }
                 else
                 {
-                    Logger.WarnMarkUp($"[green]{fourCC}[/] not supported! Skiped.");
+                    Logger.WarnMarkUp($"[green]{qualityLevel.FourCC}[/] not supported! Skiped.");
                     continue;
                 }
             }
@@ -390,4 +382,51 @@ internal partial class MSSExtractor : IExtractor
         //这里才调用URL预处理器，节省开销
         await ProcessUrlAsync(streamSpecs);
     }
+
+    private QualityLevel ReadQualityLevel(XElement qualityLevelElem)
+    {
+        var fourCC = qualityLevelElem.Attribute("FourCC")!.Value.ToUpper();
+        var samplingRateStr = qualityLevelElem.Attribute("SamplingRate")?.Value;
+        var bitsPerSampleStr = qualityLevelElem.Attribute("BitsPerSample")?.Value;
+        var nalUnitLengthFieldStr = qualityLevelElem.Attribute("NALUnitLengthField")?.Value;
+        var indexStr = qualityLevelElem.Attribute("Index")?.Value;
+        var codecPrivateData = qualityLevelElem.Attribute("CodecPrivateData")?.Value ?? "";
+        var audioTag = qualityLevelElem.Attribute("AudioTag")?.Value;
+        var bitrate = Convert.ToInt32(qualityLevelElem.Attribute("Bitrate")?.Value ?? "0");
+        var width = Convert.ToInt32(qualityLevelElem.Attribute("MaxWidth")?.Value ?? "0");
+        var height = Convert.ToInt32(qualityLevelElem.Attribute("MaxHeight")?.Value ?? "0");
+        var channels = qualityLevelElem.Attribute("Channels")?.Value;
+
+        return new QualityLevel(
+            fourCC, 
+            samplingRateStr, 
+            bitsPerSampleStr, 
+            nalUnitLengthFieldStr, 
+            indexStr,
+            codecPrivateData, 
+            audioTag, 
+            bitrate,
+            width, 
+            height, 
+            channels);
+    }
+
+    record QualityLevel(
+        string FourCC,
+        string? SamplingRateStr,
+        string? BitsPerSampleStr,
+        string? NalUnitLengthFieldStr,
+        string? IndexStr,
+        string CodecPrivateData,
+        string? AudioTag,
+        int Bitrate,
+        int Width,
+        int Height,
+        string? Channels
+    )
+    {
+        public string? Resolution => Width == 0 ? null : $"{Width}x{Height}";
+
+        public int? SamplingRate => SamplingRateStr == null ? null : Convert.ToInt32(SamplingRateStr);
+    };
 }
