@@ -113,8 +113,8 @@ public partial class ParserUtil
 
         Uri uri1 = new Uri(baseurl);  //这里直接传完整的URL即可
         Uri uri2 = new Uri(uri1, url);
-        url = uri2.ToString();
+        var ret = uri2.ToString();
 
-        return url;
+        return ret;
     }
 }

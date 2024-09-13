@@ -34,6 +34,8 @@ public class MSSExtractorTest
         streamSpec0.MSSData.NalUnitLengthField.Should().Be(4);
         streamSpec0.MSSData.Duration.Should().Be(1209510000L);
         streamSpec0.MSSData.Timesacle.Should().Be(10000000);
+        streamSpec0.Playlist!.IsLive.Should().BeFalse();
+        streamSpec0.Playlist!.MediaParts[0].MediaSegments.Should().HaveCount(61);
 
         var streamSpec1 = streamSpecs[1];
         streamSpec1.PeriodId.Should().Be("1");

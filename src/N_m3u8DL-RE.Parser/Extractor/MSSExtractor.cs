@@ -169,19 +169,19 @@ internal partial class MSSExtractor : IExtractor
                     }
                     for (long i = 0; i < _repeatCount; i++)
                     {
-                        currentTime += _duration;
+                        currentTime += cElem.Duration;
                         MediaSegment _mediaSegment = new();
                         varDic[MSSTags.StartTime] = currentTime;
                         var _oriUrl = ParserUtil.CombineURL(this.BaseUrl, urlPattern!);
                         var _mediaUrl = ParserUtil.ReplaceVars(_oriUrl, varDic);
                         _mediaSegment.Url = _mediaUrl;
                         _mediaSegment.Index = segIndex++;
-                        _mediaSegment.Duration = _duration / (double)ssm.Timescale;
+                        _mediaSegment.Duration = cElem.Duration / (double)ssm.Timescale;
                         if (_oriUrl.Contains(MSSTags.StartTime))
                             _mediaSegment.NameFromVar = currentTime.ToString();
                         streamSpec.Playlist.MediaParts[0].MediaSegments.Add(_mediaSegment);
                     }
-                    currentTime += _duration;
+                    currentTime += cElem.Duration;
                 }
 
                 //生成MOOV数据
