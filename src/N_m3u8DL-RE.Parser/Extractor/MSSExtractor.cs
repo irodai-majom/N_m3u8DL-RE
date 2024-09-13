@@ -260,6 +260,7 @@ internal partial class MSSExtractor : IExtractor
     /// 解析编码
     /// </summary>
     /// <param name="fourCC"></param>
+    /// <param name="privateData"></param>
     /// <returns></returns>
     private static string? ParseCodecs(string fourCC, string? privateData)
     {
@@ -306,21 +307,21 @@ internal partial class MSSExtractor : IExtractor
 
     private async Task ProcessUrlAsync(List<StreamSpec> streamSpecs)
     {
-        for (int i = 0; i < streamSpecs.Count; i++)
+        foreach (var streamSpec in streamSpecs)
         {
-            var playlist = streamSpecs[i].Playlist;
+            var playlist = streamSpec.Playlist;
             if (playlist != null)
             {
                 if (playlist.MediaInit != null)
                 {
                     playlist.MediaInit!.Url = PreProcessUrl(playlist.MediaInit!.Url);
                 }
-                for (int ii = 0; ii < playlist!.MediaParts.Count; ii++)
+
+                foreach (var part in playlist.MediaParts)
                 {
-                    var part = playlist.MediaParts[ii];
-                    for (int iii = 0; iii < part.MediaSegments.Count; iii++)
+                    foreach (var mediaSegment in part.MediaSegments)
                     {
-                        part.MediaSegments[iii].Url = PreProcessUrl(part.MediaSegments[iii].Url);
+                        mediaSegment.Url = PreProcessUrl(mediaSegment.Url);
                     }
                 }
             }
