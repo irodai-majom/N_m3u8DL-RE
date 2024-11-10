@@ -122,27 +122,31 @@ internal partial class MSSExtractor : IExtractor
                 var width = Convert.ToInt32(qualityLevel.Attribute("MaxWidth")?.Value ?? "0");
                 var height = Convert.ToInt32(qualityLevel.Attribute("MaxHeight")?.Value ?? "0");
                 var channels = qualityLevel.Attribute("Channels")?.Value;
-
-                StreamSpec streamSpec = new();
-                streamSpec.PublishTime = DateTime.Now; // 发布时间默认现在
-                streamSpec.Extension = "m4s";
-                streamSpec.OriginalUrl = ParserConfig.OriginalUrl;
-                streamSpec.PeriodId = indexStr;
-                streamSpec.Playlist = new Playlist();
-                streamSpec.Playlist.IsLive = isLive;
-                streamSpec.Playlist.MediaParts.Add(new MediaPart());
-                streamSpec.GroupId = name ?? indexStr;
-                streamSpec.Bandwidth = bitrate;
-                streamSpec.Codecs = ParseCodecs(fourCC, codecPrivateData);
-                streamSpec.Language = language;
-                streamSpec.Resolution = width == 0 ? null : $"{width}x{height}";
-                streamSpec.Url = IsmUrl;
-                streamSpec.Channels = channels;
-                streamSpec.MediaType = type switch
+                
+                var playlist = new Playlist();
+                playlist.IsLive = isLive;
+                playlist.MediaParts.Add(new MediaPart());
+                
+                StreamSpec streamSpec = new()
                 {
-                    "text" => MediaType.SUBTITLES,
-                    "audio" => MediaType.AUDIO,
-                    _ => null
+                    PublishTime = DateTime.Now, // 发布时间默认现在
+                    Extension = "m4s",
+                    OriginalUrl = ParserConfig.OriginalUrl,
+                    PeriodId = indexStr,
+                    Playlist = playlist,
+                    GroupId = name ?? indexStr,
+                    Bandwidth = bitrate,
+                    Codecs = ParseCodecs(fourCC, codecPrivateData),
+                    Language = language,
+                    Resolution = width == 0 ? null : $"{width}x{height}",
+                    Url = IsmUrl,
+                    Channels = channels,
+                    MediaType = type switch
+                    {
+                        "text" => MediaType.SUBTITLES,
+                        "audio" => MediaType.AUDIO,
+                        _ => null
+                    }
                 };
 
                 streamSpec.Playlist.MediaInit = new MediaSegment();
