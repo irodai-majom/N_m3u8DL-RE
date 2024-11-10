@@ -122,18 +122,19 @@ internal partial class MSSExtractor : IExtractor
                 var width = Convert.ToInt32(qualityLevel.Attribute("MaxWidth")?.Value ?? "0");
                 var height = Convert.ToInt32(qualityLevel.Attribute("MaxHeight")?.Value ?? "0");
                 var channels = qualityLevel.Attribute("Channels")?.Value;
-                
-                var playlist = new Playlist();
-                playlist.IsLive = isLive;
-                playlist.MediaParts.Add(new MediaPart());
-                
+
                 StreamSpec streamSpec = new()
                 {
                     PublishTime = DateTime.Now, // 发布时间默认现在
                     Extension = "m4s",
                     OriginalUrl = ParserConfig.OriginalUrl,
                     PeriodId = indexStr,
-                    Playlist = playlist,
+                    Playlist = new Playlist
+                    {
+                        IsLive = isLive,
+                        MediaParts = [new MediaPart()],
+                        MediaInit = new MediaSegment()
+                    },
                     GroupId = name ?? indexStr,
                     Bandwidth = bitrate,
                     Codecs = ParseCodecs(fourCC, codecPrivateData),
@@ -148,8 +149,7 @@ internal partial class MSSExtractor : IExtractor
                         _ => null
                     }
                 };
-
-                streamSpec.Playlist.MediaInit = new MediaSegment();
+                
                 if (!string.IsNullOrEmpty(codecPrivateData))
                 {
                     streamSpec.Playlist.MediaInit.Index = -1; // 便于排序
