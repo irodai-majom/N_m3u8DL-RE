@@ -149,23 +149,27 @@ internal class DASHExtractor2 : IExtractor
                         mimeType = representation.Attribute("contentType")?.Value ?? representation.Attribute("mimeType")?.Value ?? "";
                     }
                     var bandwidth = representation.Attribute("bandwidth");
-                    StreamSpec streamSpec = new();
-                    streamSpec.OriginalUrl = ParserConfig.OriginalUrl;
-                    streamSpec.PeriodId = periodId;
-                    streamSpec.Playlist = new Playlist();
-                    streamSpec.Playlist.MediaParts.Add(new MediaPart());
-                    streamSpec.GroupId = representation.Attribute("id")?.Value;
-                    streamSpec.Bandwidth = Convert.ToInt32(bandwidth?.Value ?? "0");
-                    streamSpec.Codecs = representation.Attribute("codecs")?.Value ?? adaptationSet.Attribute("codecs")?.Value;
-                    streamSpec.Language = FilterLanguage(representation.Attribute("lang")?.Value ?? adaptationSet.Attribute("lang")?.Value);
-                    streamSpec.FrameRate = frameRate ?? GetFrameRate(representation);
-                    streamSpec.Resolution = representation.Attribute("width")?.Value != null ? $"{representation.Attribute("width")?.Value}x{representation.Attribute("height")?.Value}" : null;
-                    streamSpec.Url = MpdUrl;
-                    streamSpec.MediaType = mimeType.Split('/')[0] switch
+                    StreamSpec streamSpec = new()
                     {
-                        "text" => MediaType.SUBTITLES,
-                        "audio" => MediaType.AUDIO,
-                        _ => null
+                        OriginalUrl = ParserConfig.OriginalUrl,
+                        PeriodId = periodId,
+                        Playlist = new Playlist
+                        {
+                            MediaParts = [new MediaPart()]
+                        },
+                        GroupId = representation.Attribute("id")?.Value,
+                        Bandwidth = Convert.ToInt32(bandwidth?.Value ?? "0"),
+                        Codecs = representation.Attribute("codecs")?.Value ?? adaptationSet.Attribute("codecs")?.Value,
+                        Language = FilterLanguage(representation.Attribute("lang")?.Value ?? adaptationSet.Attribute("lang")?.Value),
+                        FrameRate = frameRate ?? GetFrameRate(representation),
+                        Resolution = representation.Attribute("width")?.Value != null ? $"{representation.Attribute("width")?.Value}x{representation.Attribute("height")?.Value}" : null,
+                        Url = MpdUrl,
+                        MediaType = mimeType.Split('/')[0] switch
+                        {
+                            "text" => MediaType.SUBTITLES,
+                            "audio" => MediaType.AUDIO,
+                            _ => null
+                        }
                     };
                     // 特殊处理
                     if (representation.Attribute("volumeAdjust") != null)
