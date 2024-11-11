@@ -26,8 +26,6 @@ internal class HLSExtractor : IExtractor
 
     public ParserConfig ParserConfig { get; set; }
 
-    private HLSExtractor() { }
-
     public HLSExtractor(ParserConfig parserConfig)
     {
         this.ParserConfig = parserConfig;

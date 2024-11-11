@@ -19,11 +19,6 @@ public class StreamExtractor
 
     public Dictionary<string, string> RawFiles { get; set; } = new(); // 存储（文件名,文件内容）
 
-    public StreamExtractor()
-    {
-
-    }
-
     public StreamExtractor(ParserConfig parserConfig)
     {
         this.parserConfig = parserConfig;
